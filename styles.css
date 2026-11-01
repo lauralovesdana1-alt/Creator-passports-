@@ -1,93 +1,312 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GitHub Creator Passports</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <div class="page-shell">
-      <header class="topbar">
-        <div>
-          <p class="eyebrow">Developer directory</p>
-          <h1>GitHub Creator Passports</h1>
-        </div>
+const STORAGE_KEY = 'creator-passports-v1';
+const DEFAULT_CREATORS = [
+  {
+    id: 'creator-dana-20391',
+    name: 'Dana Reed',
+    githubUsername: 'lauralovesdana1-alt',
+    bio: 'Builds developer tools, growth systems, and elegant product experiences.',
+    skills: ['React', 'Node', 'UX', 'GitHub API'],
+    verified: true
+  },
+  {
+    id: 'creator-oliver-40198',
+    name: 'Oliver Grant',
+    githubUsername: 'olivergrant',
+    bio: 'Platform engineer focused on open-source tooling and scalable internal APIs.',
+    skills: ['Go', 'DevOps', 'Kubernetes', 'CI/CD'],
+    verified: true
+  },
+  {
+    id: 'creator-sanya-78501',
+    name: 'Sanya Patel',
+    githubUsername: 'sanyapatel',
+    bio: 'Designs developer experiences and product architecture for creator communities.',
+    skills: ['TypeScript', 'Design Systems', 'Frontend', 'AI'],
+    verified: false
+  },
+  {
+    id: 'creator-jamie-90317',
+    name: 'Jamie Collins',
+    githubUsername: 'jamiecollins',
+    bio: 'Shipping developer experiences that combine performance, trust, and clarity.',
+    skills: ['Rust', 'Systems', 'Performance', 'Security'],
+    verified: true
+  }
+];
 
-        <div class="header-actions">
-          <button class="secondary-btn" type="button" id="resetDemo">Reset demo</button>
-          <button class="primary-btn" type="button" id="scrollToForm">Create passport</button>
-        </div>
-      </header>
+const creatorGrid = document.querySelector('#creatorGrid');
+const searchInput = document.querySelector('#searchInput');
+const creatorForm = document.querySelector('#creatorForm');
+const resultCount = document.querySelector('#resultCount');
+const scrollToFormButton = document.querySelector('#scrollToForm');
+const resetDemoButton = document.querySelector('#resetDemo');
 
-      <main class="layout">
-        <section class="panel search-panel">
-          <div class="panel-heading">
-            <span class="chip success">Live directory</span>
-            <h2>Find creators</h2>
+let creators = [];
+
+function loadLocalCreators() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return [...DEFAULT_CREATORS];
+    const parsed = JSON.parse(saved);
+    return Array.isArray(parsed) && parsed.length ? parsed : [...DEFAULT_CREATORS];
+  } catch (error) {
+    console.warn('Could not load local creators:', error);
+    return [...DEFAULT_CREATORS];
+  }
+}
+
+function persistLocalCreators(list) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  } catch (error) {
+    console.warn('Could not save local creators:', error);
+  }
+}
+
+async function loadCreatorsFromServer() {
+  try {
+    const response = await fetch('/api/creators', { cache: 'no-store' });
+    if (!response.ok) {
+      throw new Error(`Server responded with ${response.status}`);
+    }
+
+    const data = await response.json();
+    if (Array.isArray(data) && data.length) {
+      return data;
+    }
+  } catch (error) {
+    console.warn('Using local fallback creators:', error);
+  }
+
+  return loadLocalCreators();
+}
+
+async function initializeCreators() {
+  creators = await loadCreatorsFromServer();
+  persistLocalCreators(creators);
+  updateView();
+}
+
+function normalizeSkills(value) {
+  return value
+    .split(',')
+    .map((skill) => skill.trim())
+    .filter(Boolean);
+}
+
+function generateCreatorId(username) {
+  const cleanName = (username || 'developer')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '')
+    .slice(0, 12) || 'developer';
+
+  const suffix = Math.random().toString(36).slice(2, 7);
+  return `creator-${cleanName}-${suffix}`;
+}
+
+function safeAvatar(username) {
+  const trimmed = (username || '').trim();
+  if (!trimmed) {
+    return 'https://ui-avatars.com/api/?name=Developer&background=7c9cff&color=fff';
+  }
+
+  return `https://github.com/${trimmed}.png?size=160`;
+}
+
+function skillList(skills) {
+  return (skills || []).map((skill) => `<span class="tag">${skill}</span>`).join('');
+}
+
+function getVisibleCreators() {
+  const query = (searchInput?.value || '').trim().toLowerCase();
+
+  if (!query) {
+    return creators;
+  }
+
+  return creators.filter((creator) => {
+    const haystack = [
+      creator.name,
+      creator.githubUsername,
+      creator.bio,
+      (creator.skills || []).join(' '),
+      creator.id
+    ]
+      .join(' ')
+      .toLowerCase();
+
+    return haystack.includes(query);
+  });
+}
+
+function renderCreators(list) {
+  if (!creatorGrid) return;
+
+  resultCount.textContent = `${list.length} creator${list.length === 1 ? '' : 's'}`;
+
+  if (!list.length) {
+    creatorGrid.innerHTML = `
+      <div class="empty-state">
+        <h3>No creators found</h3>
+        <p>Try a different name, GitHub handle, or skill.</p>
+      </div>
+    `;
+    return;
+  }
+
+  creatorGrid.innerHTML = list
+    .map(
+      (creator) => `
+        <article class="creator-card">
+          <div class="card-top">
+            <img
+              src="${safeAvatar(creator.githubUsername)}"
+              alt="${creator.name}"
+              onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(creator.name || 'Developer')}&background=7c9cff&color=fff';"
+            />
+            <div>
+              <div class="identity-row">
+                <h3>${creator.name}</h3>
+                ${creator.verified ? '<span class="verified-badge">Verified</span>' : '<span class="unverified-badge">Unverified</span>'}
+              </div>
+              <p class="username">@${creator.githubUsername}</p>
+            </div>
           </div>
 
-          <label class="field">
-            <span>Search by name, GitHub handle, or skill</span>
-            <input id="searchInput" type="text" placeholder="Try: react, octocat, dana..." />
-          </label>
-        </section>
-
-        <section class="panel form-panel" id="passportFormSection">
-          <div class="panel-heading">
-            <span class="chip">New</span>
-            <h2>Create creator passport</h2>
+          <div class="creator-id-box">
+            <span>Creator ID</span>
+            <strong>${creator.id}</strong>
           </div>
 
-          <form id="creatorForm" novalidate>
-            <div class="input-grid">
-              <label class="field">
-                <span>Full name</span>
-                <input name="name" type="text" placeholder="Dana Lee" required />
-              </label>
+          <p class="bio">${creator.bio}</p>
 
-              <label class="field">
-                <span>GitHub username</span>
-                <input name="githubUsername" type="text" placeholder="octocat" required />
-              </label>
-            </div>
+          <div class="tags">
+            ${skillList(creator.skills || [])}
+          </div>
+        </article>
+      `
+    )
+    .join('');
+}
 
-            <label class="field">
-              <span>Bio</span>
-              <textarea name="bio" rows="3" placeholder="Frontend engineer building developer tools for the GitHub ecosystem..."></textarea>
-            </label>
+function updateView() {
+  renderCreators(getVisibleCreators());
+}
 
-            <label class="field">
-              <span>Skills</span>
-              <input name="skills" type="text" placeholder="react, node, ui design" required />
-            </label>
+async function addCreator(payload) {
+  try {
+    const response = await fetch('/api/creators', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
 
-            <div class="check-row">
-              <label class="checkbox-wrap">
-                <input name="verified" type="checkbox" checked />
-                <span>Verified developer</span>
-              </label>
-            </div>
+    if (!response.ok) {
+      throw new Error(`Request failed with ${response.status}`);
+    }
 
-            <div class="form-actions">
-              <button class="primary-btn" type="submit">Generate passport</button>
-            </div>
-          </form>
-        </section>
-      </main>
+    const updated = await response.json();
+    creators = Array.isArray(updated) ? updated : [payload, ...creators];
+    persistLocalCreators(creators);
+    return true;
+  } catch (error) {
+    console.warn('Server save failed, using local fallback:', error);
+    const localCreator = {
+      ...payload,
+      id: generateCreatorId(payload.githubUsername)
+    };
+    creators = [localCreator, ...creators];
+    persistLocalCreators(creators);
+    return true;
+  }
+}
 
-      <section class="results">
-        <div class="results-header">
-          <h2>Developer passports</h2>
-          <span id="resultCount">0 creators</span>
-        </div>
-        <div id="creatorGrid" class="creator-grid" aria-live="polite"></div>
-      </section>
-    </div>
+async function resetDemoData() {
+  try {
+    const response = await fetch('/api/reset', { method: 'POST' });
+    if (!response.ok) {
+      throw new Error(`Reset failed with ${response.status}`);
+    }
 
-    <script src="app.js"></script>
-  </body>
-</html>
+    const data = await response.json();
+    creators = Array.isArray(data) ? data : [...DEFAULT_CREATORS];
+    persistLocalCreators(creators);
+    if (searchInput) searchInput.value = '';
+    updateView();
+    return;
+  } catch (error) {
+    console.warn('Reset fallback used:', error);
+    creators = [...DEFAULT_CREATORS];
+    persistLocalCreators(creators);
+    if (searchInput) searchInput.value = '';
+    updateView();
+  }
+}
+
+if (searchInput) {
+  searchInput.addEventListener('input', updateView);
+}
+
+if (creatorForm) {
+  creatorForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const formData = new FormData(creatorForm);
+    const name = formData.get('name').toString().trim();
+    const githubUsername = formData.get('githubUsername').toString().trim();
+    const bio = formData.get('bio').toString().trim() || 'Developer building meaningful experiences for the open web.';
+    const skills = normalizeSkills(formData.get('skills').toString());
+    const verified = formData.get('verified') === 'on';
+
+    if (!name || !githubUsername || !skills.length) {
+      return;
+    }
+
+    const payload = {
+      name,
+      githubUsername,
+      bio,
+      skills,
+      verified
+    };
+
+    await addCreator(payload);
+    creatorForm.reset();
+    if (searchInput) searchInput.value = '';
+    updateView();
+
+    const formSection = document.querySelector('#passportFormSection');
+    if (formSection) {
+      formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+}
+
+if (scrollToFormButton) {
+  scrollToFormButton.addEventListener('click', () => {
+    const formSection = document.querySelector('#passportFormSection');
+    if (formSection) {
+      formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+}
+
+if (resetDemoButton) {
+  resetDemoButton.addEventListener('click', resetDemoData);
+}
+
+initializeCreators();
+
+window.addEventListener('error', (event) => {
+  console.error('Runtime error:', event.error || event.message);
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Unhandled rejection:', event.reason);
+});
+
+if (!creatorGrid || !searchInput || !creatorForm || !resultCount) {
+  console.error('Required creator passport UI elements are missing.');
+}
+
+console.log('GitHub Creator Passports initialized successfully.');

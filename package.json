@@ -1,0 +1,20 @@
+{
+  "name": "creator-passports",
+  "version": "1.1.0",
+  "description": "GitHub creator passport directory with a small backend and local storage fallback.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "github",
+    "creator",
+    "passport",
+    "developers"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
