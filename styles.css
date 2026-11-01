@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GitHub Creator Passports</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Developer directory</p>
+          <h1>GitHub Creator Passports</h1>
+        </div>
+        <button class="primary-btn" type="button" id="scrollToForm">Create passport</button>
+      </header>
+
+      <main class="layout">
+        <section class="panel search-panel">
+          <div class="panel-heading">
+            <span class="chip success">Live directory</span>
+            <h2>Find creators</h2>
+          </div>
+
+          <label class="field">
+            <span>Search by name, GitHub handle, or skill</span>
+            <input id="searchInput" type="text" placeholder="Try: react, octocat, dana..." />
+          </label>
+        </section>
+
+        <section class="panel form-panel" id="passportFormSection">
+          <div class="panel-heading">
+            <span class="chip">New</span>
+            <h2>Create creator passport</h2>
+          </div>
+
+          <form id="creatorForm">
+            <div class="input-grid">
+              <label class="field">
+                <span>Full name</span>
+                <input name="name" type="text" placeholder="Dana Lee" required />
+              </label>
+
+              <label class="field">
+                <span>GitHub username</span>
+                <input name="githubUsername" type="text" placeholder="octocat" required />
+              </label>
+            </div>
+
+            <label class="field">
+              <span>Bio</span>
+              <textarea name="bio" rows="3" placeholder="Frontend engineer building developer tools for the GitHub ecosystem..."></textarea>
+            </label>
+
+            <label class="field">
+              <span>Skills</span>
+              <input name="skills" type="text" placeholder="react, node, ui design" required />
+            </label>
+
+            <div class="check-row">
+              <label class="checkbox-wrap">
+                <input name="verified" type="checkbox" checked />
+                <span>Verified developer</span>
+              </label>
+            </div>
+
+            <button class="primary-btn" type="submit">Generate passport</button>
+          </form>
+        </section>
+      </main>
+
+      <section class="results">
+        <div class="results-header">
+          <h2>Developer passports</h2>
+          <span id="resultCount">0 creators</span>
+        </div>
+        <div id="creatorGrid" class="creator-grid" aria-live="polite"></div>
+      </section>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
