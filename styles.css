@@ -149,6 +149,8 @@ function renderCreators(list) {
         <div class="tags">
           ${(creator.skills || []).map((skill) => `<span class="tag">${skill}</span>`).join('')}
         </div>
+
+        <a class="profile-link" href="/profile/${encodeURIComponent(creator.githubUsername || creator.name)}" target="_blank" rel="noreferrer">View profile</a>
       </article>
     `)
     .join('');
@@ -324,3 +326,30 @@ window.addEventListener('unhandledrejection', (event) => {
 if (!creatorGrid || !searchInput || !creatorForm || !resultCount) {
   console.error('Required app UI elements are missing.');
 }
+
+// CSS for header buttons, status pill, and profile link
+const css = `
+  .hidden { display: none !important; }
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(124,156,255,0.10);
+    border: 1px solid rgba(124,156,255,0.22);
+    color: #dfeafe;
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+  .profile-link {
+    color: #bfd2ff;
+    text-decoration: none;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+  .profile-link:hover { text-decoration: underline; }
+`;
+
+const styleTag = document.createElement('style');
+styleTag.textContent = css;
+document.head.appendChild(styleTag);

@@ -7,7 +7,8 @@ A GitHub-authenticated creator passport directory for developers.
 - Verified creator badges
 - GitHub OAuth sign-in
 - SQLite-backed persistence
-- Public creator profile updates
+- Public profile pages
+- Profile editing for signed-in users
 - Reset to demo creators
 
 ## Requirements
@@ -41,12 +42,16 @@ A GitHub-authenticated creator passport directory for developers.
    http://localhost:3000
    ```
 
+## Profile route
+- Visit `/profile/:githubUsername` to view a public creator profile page.
+
 ## API endpoints
 - `GET /api/creators` — list all creator passports
+- `GET /api/creator/:username` — fetch a single creator record
 - `GET /api/session` — current signed-in GitHub user
 - `POST /api/profile` — update the signed-in creator profile
 - `POST /api/reset` — restore demo creators
 - `POST /api/logout` — sign the user out
 
 ## Notes
-This is a strong MVP foundation for creator verification and GitHub-linked developer identities. It is ready for future improvements like organization membership checks, admin approval flows, and richer profile pages.
+This is a solid MVP foundation for creator verification and GitHub-linked developer identities. It is ready for future improvements like organization membership checks, admin approval flows, and richer profile pages.
