@@ -1,12 +1,12 @@
-const initialCreators = [
+const STORAGE_KEY = 'creator-passports-v1';
+const DEFAULT_CREATORS = [
   {
     id: 'creator-dana-20391',
     name: 'Dana Reed',
     githubUsername: 'lauralovesdana1-alt',
     bio: 'Builds developer tools, growth systems, and elegant product experiences.',
     skills: ['React', 'Node', 'UX', 'GitHub API'],
-    verified: true,
-    avatar: 'https://github.com/lauralovesdana1-alt.png?size=160'
+    verified: true
   },
   {
     id: 'creator-oliver-40198',
@@ -14,8 +14,7 @@ const initialCreators = [
     githubUsername: 'olivergrant',
     bio: 'Platform engineer focused on open-source tooling and scalable internal APIs.',
     skills: ['Go', 'DevOps', 'Kubernetes', 'CI/CD'],
-    verified: true,
-    avatar: 'https://github.com/olivergrant.png?size=160'
+    verified: true
   },
   {
     id: 'creator-sanya-78501',
@@ -23,8 +22,7 @@ const initialCreators = [
     githubUsername: 'sanyapatel',
     bio: 'Designs developer experiences and product architecture for creator communities.',
     skills: ['TypeScript', 'Design Systems', 'Frontend', 'AI'],
-    verified: false,
-    avatar: 'https://github.com/sanyapatel.png?size=160'
+    verified: false
   },
   {
     id: 'creator-jamie-90317',
@@ -32,8 +30,7 @@ const initialCreators = [
     githubUsername: 'jamiecollins',
     bio: 'Shipping developer experiences that combine performance, trust, and clarity.',
     skills: ['Rust', 'Systems', 'Performance', 'Security'],
-    verified: true,
-    avatar: 'https://github.com/jamiecollins.png?size=160'
+    verified: true
   }
 ];
 
@@ -42,17 +39,49 @@ const searchInput = document.querySelector('#searchInput');
 const creatorForm = document.querySelector('#creatorForm');
 const resultCount = document.querySelector('#resultCount');
 const scrollToFormButton = document.querySelector('#scrollToForm');
+const resetDemoButton = document.querySelector('#resetDemo');
 
-let creators = [...initialCreators];
+let creators = loadCreators();
+
+function loadCreators() {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+
+    if (!stored) {
+      return [...DEFAULT_CREATORS];
+    }
+
+    const parsed = JSON.parse(stored);
+    return Array.isArray(parsed) && parsed.length ? parsed : [...DEFAULT_CREATORS];
+  } catch (error) {
+    console.warn('Unable to read saved creators:', error);
+    return [...DEFAULT_CREATORS];
+  }
+}
+
+function persistCreators() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(creators));
+  } catch (error) {
+    console.warn('Unable to save creators:', error);
+  }
+}
+
+function normalizeSkills(value) {
+  return value
+    .split(',')
+    .map((skill) => skill.trim())
+    .filter(Boolean);
+}
 
 function generateCreatorId(username) {
   const cleanName = (username || 'developer')
     .toLowerCase()
     .replace(/[^a-z0-9]/g, '')
-    .slice(0, 12);
+    .slice(0, 12) || 'developer';
 
   const suffix = Math.random().toString(36).slice(2, 7);
-  return `creator-${cleanName || 'developer'}-${suffix}`;
+  return `creator-${cleanName}-${suffix}`;
 }
 
 function safeAvatar(username) {
@@ -65,10 +94,34 @@ function safeAvatar(username) {
 }
 
 function skillList(skills) {
-  return skills.map((skill) => `<span class="tag">${skill}</span>`).join('');
+  return (skills || []).map((skill) => `<span class="tag">${skill}</span>`).join('');
+}
+
+function getVisibleCreators() {
+  const query = (searchInput?.value || '').trim().toLowerCase();
+
+  if (!query) {
+    return creators;
+  }
+
+  return creators.filter((creator) => {
+    const haystack = [
+      creator.name,
+      creator.githubUsername,
+      creator.bio,
+      (creator.skills || []).join(' '),
+      creator.id
+    ]
+      .join(' ')
+      .toLowerCase();
+
+    return haystack.includes(query);
+  });
 }
 
 function renderCreators(list) {
+  if (!creatorGrid) return;
+
   resultCount.textContent = `${list.length} creator${list.length === 1 ? '' : 's'}`;
 
   if (!list.length) {
@@ -86,7 +139,11 @@ function renderCreators(list) {
       (creator) => `
         <article class="creator-card">
           <div class="card-top">
-            <img src="${safeAvatar(creator.githubUsername)}" alt="${creator.name}" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(creator.name || 'Developer')}&background=7c9cff&color=fff';" />
+            <img
+              src="${safeAvatar(creator.githubUsername)}"
+              alt="${creator.name}"
+              onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(creator.name || 'Developer')}&background=7c9cff&color=fff';"
+            />
             <div>
               <div class="identity-row">
                 <h3>${creator.name}</h3>
@@ -112,42 +169,20 @@ function renderCreators(list) {
     .join('');
 }
 
-function filterCreators() {
-  const query = searchInput.value.trim().toLowerCase();
-
-  if (!query) {
-    renderCreators(creators);
-    return;
-  }
-
-  const filtered = creators.filter((creator) => {
-    const haystack = [
-      creator.name,
-      creator.githubUsername,
-      creator.bio,
-      creator.skills.join(' '),
-      creator.id
-    ].join(' ').toLowerCase();
-
-    return haystack.includes(query);
-  });
-
-  renderCreators(filtered);
+function updateView() {
+  renderCreators(getVisibleCreators());
 }
 
-creatorForm.addEventListener('submit', (event) => {
+function handleFormSubmit(event) {
   event.preventDefault();
+
+  if (!creatorForm) return;
 
   const formData = new FormData(creatorForm);
   const name = formData.get('name').toString().trim();
   const githubUsername = formData.get('githubUsername').toString().trim();
   const bio = formData.get('bio').toString().trim() || 'Developer building meaningful experiences for the open web.';
-  const skills = formData
-    .get('skills')
-    .toString()
-    .split(',')
-    .map((skill) => skill.trim())
-    .filter(Boolean);
+  const skills = normalizeSkills(formData.get('skills').toString());
   const verified = formData.get('verified') === 'on';
 
   if (!name || !githubUsername || !skills.length) {
@@ -160,34 +195,52 @@ creatorForm.addEventListener('submit', (event) => {
     githubUsername,
     bio,
     skills,
-    verified,
-    avatar: safeAvatar(githubUsername)
+    verified
   };
 
   creators = [newCreator, ...creators];
+  persistCreators();
   creatorForm.reset();
-  renderCreators(creators);
   searchInput.value = '';
+  updateView();
 
   const formSection = document.querySelector('#passportFormSection');
   if (formSection) {
     formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
-});
-
-searchInput.addEventListener('input', filterCreators);
-scrollToFormButton.addEventListener('click', () => {
-  const formSection = document.querySelector('#passportFormSection');
-  if (formSection) {
-    formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-});
-
-renderCreators(creators);
-
-if (!creatorGrid || !searchInput || !creatorForm || !scrollToFormButton || !resultCount) {
-  console.error('Creator passport UI elements are missing.');
 }
+
+function resetDemoData() {
+  creators = [...DEFAULT_CREATORS];
+  persistCreators();
+  if (searchInput) {
+    searchInput.value = '';
+  }
+  updateView();
+}
+
+if (searchInput) {
+  searchInput.addEventListener('input', updateView);
+}
+
+if (creatorForm) {
+  creatorForm.addEventListener('submit', handleFormSubmit);
+}
+
+if (scrollToFormButton) {
+  scrollToFormButton.addEventListener('click', () => {
+    const formSection = document.querySelector('#passportFormSection');
+    if (formSection) {
+      formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+}
+
+if (resetDemoButton) {
+  resetDemoButton.addEventListener('click', resetDemoData);
+}
+
+updateView();
 
 window.addEventListener('error', (event) => {
   console.error('Runtime error:', event.error || event.message);
@@ -199,6 +252,9 @@ window.addEventListener('unhandledrejection', (event) => {
 
 console.log('GitHub Creator Passports initialized successfully.');
 
+if (!creatorGrid || !searchInput || !creatorForm || !resultCount) {
+  console.error('Required creator passport UI elements are missing.');
+}
 
 
 
@@ -572,3 +628,779 @@ console.log('GitHub Creator Passports initialized successfully.');
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+="
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+n
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+n
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+n
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+" ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+n
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"}]} ,

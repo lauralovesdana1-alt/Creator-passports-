@@ -16,7 +16,11 @@
           <p class="eyebrow">Developer directory</p>
           <h1>GitHub Creator Passports</h1>
         </div>
-        <button class="primary-btn" type="button" id="scrollToForm">Create passport</button>
+
+        <div class="header-actions">
+          <button class="secondary-btn" type="button" id="resetDemo">Reset demo</button>
+          <button class="primary-btn" type="button" id="scrollToForm">Create passport</button>
+        </div>
       </header>
 
       <main class="layout">
@@ -38,7 +42,7 @@
             <h2>Create creator passport</h2>
           </div>
 
-          <form id="creatorForm">
+          <form id="creatorForm" novalidate>
             <div class="input-grid">
               <label class="field">
                 <span>Full name</span>
@@ -68,7 +72,9 @@
               </label>
             </div>
 
-            <button class="primary-btn" type="submit">Generate passport</button>
+            <div class="form-actions">
+              <button class="primary-btn" type="submit">Generate passport</button>
+            </div>
           </form>
         </section>
       </main>

@@ -55,6 +55,12 @@ textarea {
   margin-bottom: 24px;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .eyebrow {
   margin: 0 0 8px;
   text-transform: uppercase;
@@ -173,21 +179,36 @@ h1 {
   accent-color: var(--primary);
 }
 
-.primary-btn {
+.form-actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.primary-btn,
+.secondary-btn {
   border: none;
   border-radius: 12px;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-strong) 100%);
-  color: white;
   padding: 0.9rem 1.1rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 10px 22px rgba(93, 125, 245, 0.35);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
 }
 
-.primary-btn:hover {
+.primary-btn {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-strong) 100%);
+  color: white;
+  box-shadow: 0 10px 22px rgba(93, 125, 245, 0.35);
+}
+
+.secondary-btn {
+  background: rgba(148, 163, 184, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  color: var(--text);
+}
+
+.primary-btn:hover,
+.secondary-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 12px 28px rgba(115, 139, 255, 0.42);
 }
 
 .results {
@@ -352,6 +373,11 @@ h1 {
   .input-grid {
     grid-template-columns: 1fr;
   }
+
+  .header-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -359,7 +385,8 @@ h1 {
     scroll-behavior: auto;
   }
 
-  .primary-btn {
+  .primary-btn,
+  .secondary-btn {
     transition: none;
   }
 }
