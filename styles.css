@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'creator-passports-v1';
+const STORAGE_KEY = 'creator-passports-v2';
 const DEFAULT_CREATORS = [
   {
     id: 'creator-dana-20391',
@@ -6,7 +6,8 @@ const DEFAULT_CREATORS = [
     githubUsername: 'lauralovesdana1-alt',
     bio: 'Builds developer tools, growth systems, and elegant product experiences.',
     skills: ['React', 'Node', 'UX', 'GitHub API'],
-    verified: true
+    verified: true,
+    avatarUrl: 'https://github.com/lauralovesdana1-alt.png?size=160'
   },
   {
     id: 'creator-oliver-40198',
@@ -14,7 +15,8 @@ const DEFAULT_CREATORS = [
     githubUsername: 'olivergrant',
     bio: 'Platform engineer focused on open-source tooling and scalable internal APIs.',
     skills: ['Go', 'DevOps', 'Kubernetes', 'CI/CD'],
-    verified: true
+    verified: true,
+    avatarUrl: 'https://github.com/olivergrant.png?size=160'
   },
   {
     id: 'creator-sanya-78501',
@@ -22,7 +24,8 @@ const DEFAULT_CREATORS = [
     githubUsername: 'sanyapatel',
     bio: 'Designs developer experiences and product architecture for creator communities.',
     skills: ['TypeScript', 'Design Systems', 'Frontend', 'AI'],
-    verified: false
+    verified: false,
+    avatarUrl: 'https://github.com/sanyapatel.png?size=160'
   },
   {
     id: 'creator-jamie-90317',
@@ -30,7 +33,8 @@ const DEFAULT_CREATORS = [
     githubUsername: 'jamiecollins',
     bio: 'Shipping developer experiences that combine performance, trust, and clarity.',
     skills: ['Rust', 'Systems', 'Performance', 'Security'],
-    verified: true
+    verified: true,
+    avatarUrl: 'https://github.com/jamiecollins.png?size=160'
   }
 ];
 
@@ -40,8 +44,25 @@ const creatorForm = document.querySelector('#creatorForm');
 const resultCount = document.querySelector('#resultCount');
 const scrollToFormButton = document.querySelector('#scrollToForm');
 const resetDemoButton = document.querySelector('#resetDemo');
+const githubLoginButton = document.querySelector('#githubLoginBtn');
+const logoutButton = document.querySelector('#logoutBtn');
+const authStatus = document.querySelector('#authStatus');
+const nameInput = document.querySelector('#nameInput');
+const githubInput = document.querySelector('#githubInput');
+const bioInput = document.querySelector('#bioInput');
+const skillsInput = document.querySelector('#skillsInput');
+const verifiedInput = document.querySelector('#verifiedInput');
 
-let creators = [];
+let creators = [...DEFAULT_CREATORS];
+let currentUser = null;
+
+function persistLocalCreators(list) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  } catch (error) {
+    console.warn('Unable to save creators locally:', error);
+  }
+}
 
 function loadLocalCreators() {
   try {
@@ -50,41 +71,15 @@ function loadLocalCreators() {
     const parsed = JSON.parse(saved);
     return Array.isArray(parsed) && parsed.length ? parsed : [...DEFAULT_CREATORS];
   } catch (error) {
-    console.warn('Could not load local creators:', error);
+    console.warn('Unable to load local creators:', error);
     return [...DEFAULT_CREATORS];
   }
 }
 
-function persistLocalCreators(list) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-  } catch (error) {
-    console.warn('Could not save local creators:', error);
-  }
-}
-
-async function loadCreatorsFromServer() {
-  try {
-    const response = await fetch('/api/creators', { cache: 'no-store' });
-    if (!response.ok) {
-      throw new Error(`Server responded with ${response.status}`);
-    }
-
-    const data = await response.json();
-    if (Array.isArray(data) && data.length) {
-      return data;
-    }
-  } catch (error) {
-    console.warn('Using local fallback creators:', error);
-  }
-
-  return loadLocalCreators();
-}
-
-async function initializeCreators() {
-  creators = await loadCreatorsFromServer();
-  persistLocalCreators(creators);
-  updateView();
+function safeAvatar(creator) {
+  if (creator.avatarUrl) return creator.avatarUrl;
+  if (creator.githubUsername) return `https://github.com/${creator.githubUsername}.png?size=160`;
+  return 'https://ui-avatars.com/api/?name=Developer&background=7c9cff&color=fff';
 }
 
 function normalizeSkills(value) {
@@ -94,35 +89,9 @@ function normalizeSkills(value) {
     .filter(Boolean);
 }
 
-function generateCreatorId(username) {
-  const cleanName = (username || 'developer')
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, '')
-    .slice(0, 12) || 'developer';
-
-  const suffix = Math.random().toString(36).slice(2, 7);
-  return `creator-${cleanName}-${suffix}`;
-}
-
-function safeAvatar(username) {
-  const trimmed = (username || '').trim();
-  if (!trimmed) {
-    return 'https://ui-avatars.com/api/?name=Developer&background=7c9cff&color=fff';
-  }
-
-  return `https://github.com/${trimmed}.png?size=160`;
-}
-
-function skillList(skills) {
-  return (skills || []).map((skill) => `<span class="tag">${skill}</span>`).join('');
-}
-
 function getVisibleCreators() {
   const query = (searchInput?.value || '').trim().toLowerCase();
-
-  if (!query) {
-    return creators;
-  }
+  if (!query) return creators;
 
   return creators.filter((creator) => {
     const haystack = [
@@ -131,9 +100,7 @@ function getVisibleCreators() {
       creator.bio,
       (creator.skills || []).join(' '),
       creator.id
-    ]
-      .join(' ')
-      .toLowerCase();
+    ].join(' ').toLowerCase();
 
     return haystack.includes(query);
   });
@@ -155,37 +122,35 @@ function renderCreators(list) {
   }
 
   creatorGrid.innerHTML = list
-    .map(
-      (creator) => `
-        <article class="creator-card">
-          <div class="card-top">
-            <img
-              src="${safeAvatar(creator.githubUsername)}"
-              alt="${creator.name}"
-              onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(creator.name || 'Developer')}&background=7c9cff&color=fff';"
-            />
-            <div>
-              <div class="identity-row">
-                <h3>${creator.name}</h3>
-                ${creator.verified ? '<span class="verified-badge">Verified</span>' : '<span class="unverified-badge">Unverified</span>'}
-              </div>
-              <p class="username">@${creator.githubUsername}</p>
+    .map((creator) => `
+      <article class="creator-card">
+        <div class="card-top">
+          <img
+            src="${safeAvatar(creator)}"
+            alt="${creator.name}"
+            onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(creator.name || 'Developer')}&background=7c9cff&color=fff';"
+          />
+          <div>
+            <div class="identity-row">
+              <h3>${creator.name}</h3>
+              ${creator.verified ? '<span class="verified-badge">Verified</span>' : '<span class="unverified-badge">Unverified</span>'}
             </div>
+            <p class="username">@${creator.githubUsername || 'unknown'}</p>
           </div>
+        </div>
 
-          <div class="creator-id-box">
-            <span>Creator ID</span>
-            <strong>${creator.id}</strong>
-          </div>
+        <div class="creator-id-box">
+          <span>Creator ID</span>
+          <strong>${creator.id}</strong>
+        </div>
 
-          <p class="bio">${creator.bio}</p>
+        <p class="bio">${creator.bio || 'Developer building meaningful experiences for the open web.'}</p>
 
-          <div class="tags">
-            ${skillList(creator.skills || [])}
-          </div>
-        </article>
-      `
-    )
+        <div class="tags">
+          ${(creator.skills || []).map((skill) => `<span class="tag">${skill}</span>`).join('')}
+        </div>
+      </article>
+    `)
     .join('');
 }
 
@@ -193,54 +158,125 @@ function updateView() {
   renderCreators(getVisibleCreators());
 }
 
-async function addCreator(payload) {
+async function loadCreators() {
   try {
-    const response = await fetch('/api/creators', {
+    const response = await fetch('/api/creators', { cache: 'no-store' });
+    if (!response.ok) throw new Error('Could not load creators');
+    const data = await response.json();
+    creators = Array.isArray(data) && data.length ? data : loadLocalCreators();
+    persistLocalCreators(creators);
+  } catch (error) {
+    console.warn('Using local fallback data:', error);
+    creators = loadLocalCreators();
+  }
+
+  updateView();
+}
+
+async function fetchSession() {
+  try {
+    const response = await fetch('/api/session');
+    if (!response.ok) throw new Error('Session request failed');
+    const data = await response.json();
+    currentUser = data.user || null;
+    updateAuthUI();
+    return currentUser;
+  } catch (error) {
+    console.warn('No active session:', error);
+    currentUser = null;
+    updateAuthUI();
+    return null;
+  }
+}
+
+function updateAuthUI() {
+  const signedIn = Boolean(currentUser);
+
+  if (authStatus) {
+    authStatus.textContent = signedIn ? `Signed in as ${currentUser.github_username}` : 'Not signed in';
+  }
+
+  if (githubLoginButton) {
+    githubLoginButton.classList.toggle('hidden', signedIn);
+  }
+
+  if (logoutButton) {
+    logoutButton.classList.toggle('hidden', !signedIn);
+  }
+
+  if (signedIn && nameInput && githubInput && bioInput && skillsInput && verifiedInput) {
+    nameInput.value = currentUser.display_name || currentUser.github_username || '';
+    githubInput.value = currentUser.github_username || '';
+    bioInput.value = currentUser.bio || '';
+    verifiedInput.checked = true;
+  }
+}
+
+async function submitProfile(event) {
+  event.preventDefault();
+
+  if (!currentUser) {
+    window.location.href = '/auth/github';
+    return;
+  }
+
+  const payload = {
+    name: nameInput.value.trim(),
+    bio: bioInput.value.trim(),
+    website: '',
+    skills: normalizeSkills(skillsInput.value),
+    verified: verifiedInput.checked
+  };
+
+  if (!payload.name || !payload.skills.length) {
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/profile', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
 
     if (!response.ok) {
-      throw new Error(`Request failed with ${response.status}`);
+      throw new Error('Profile update failed');
     }
 
-    const updated = await response.json();
-    creators = Array.isArray(updated) ? updated : [payload, ...creators];
-    persistLocalCreators(creators);
-    return true;
+    await loadCreators();
+    creatorForm.reset();
+    if (searchInput) searchInput.value = '';
   } catch (error) {
-    console.warn('Server save failed, using local fallback:', error);
-    const localCreator = {
-      ...payload,
-      id: generateCreatorId(payload.githubUsername)
-    };
-    creators = [localCreator, ...creators];
-    persistLocalCreators(creators);
-    return true;
+    console.error('Profile save failed:', error);
   }
 }
 
 async function resetDemoData() {
   try {
     const response = await fetch('/api/reset', { method: 'POST' });
-    if (!response.ok) {
-      throw new Error(`Reset failed with ${response.status}`);
-    }
-
-    const data = await response.json();
-    creators = Array.isArray(data) ? data : [...DEFAULT_CREATORS];
+    if (!response.ok) throw new Error('Reset failed');
+    creators = await response.json();
     persistLocalCreators(creators);
     if (searchInput) searchInput.value = '';
     updateView();
-    return;
   } catch (error) {
-    console.warn('Reset fallback used:', error);
+    console.warn('Using demo fallback reset:', error);
     creators = [...DEFAULT_CREATORS];
     persistLocalCreators(creators);
-    if (searchInput) searchInput.value = '';
     updateView();
   }
+}
+
+async function signOut() {
+  try {
+    await fetch('/api/logout', { method: 'POST' });
+  } catch (error) {
+    console.warn('Logout request failed:', error);
+  }
+
+  currentUser = null;
+  updateAuthUI();
+  if (creatorForm) creatorForm.reset();
 }
 
 if (searchInput) {
@@ -248,38 +284,21 @@ if (searchInput) {
 }
 
 if (creatorForm) {
-  creatorForm.addEventListener('submit', async (event) => {
-    event.preventDefault();
+  creatorForm.addEventListener('submit', submitProfile);
+}
 
-    const formData = new FormData(creatorForm);
-    const name = formData.get('name').toString().trim();
-    const githubUsername = formData.get('githubUsername').toString().trim();
-    const bio = formData.get('bio').toString().trim() || 'Developer building meaningful experiences for the open web.';
-    const skills = normalizeSkills(formData.get('skills').toString());
-    const verified = formData.get('verified') === 'on';
+if (resetDemoButton) {
+  resetDemoButton.addEventListener('click', resetDemoData);
+}
 
-    if (!name || !githubUsername || !skills.length) {
-      return;
-    }
-
-    const payload = {
-      name,
-      githubUsername,
-      bio,
-      skills,
-      verified
-    };
-
-    await addCreator(payload);
-    creatorForm.reset();
-    if (searchInput) searchInput.value = '';
-    updateView();
-
-    const formSection = document.querySelector('#passportFormSection');
-    if (formSection) {
-      formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+if (githubLoginButton) {
+  githubLoginButton.addEventListener('click', () => {
+    window.location.href = '/auth/github';
   });
+}
+
+if (logoutButton) {
+  logoutButton.addEventListener('click', signOut);
 }
 
 if (scrollToFormButton) {
@@ -291,11 +310,8 @@ if (scrollToFormButton) {
   });
 }
 
-if (resetDemoButton) {
-  resetDemoButton.addEventListener('click', resetDemoData);
-}
-
-initializeCreators();
+fetchSession();
+loadCreators();
 
 window.addEventListener('error', (event) => {
   console.error('Runtime error:', event.error || event.message);
@@ -306,7 +322,5 @@ window.addEventListener('unhandledrejection', (event) => {
 });
 
 if (!creatorGrid || !searchInput || !creatorForm || !resultCount) {
-  console.error('Required creator passport UI elements are missing.');
+  console.error('Required app UI elements are missing.');
 }
-
-console.log('GitHub Creator Passports initialized successfully.');

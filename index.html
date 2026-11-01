@@ -1,43 +1,52 @@
-# GitHub Creator Passports
+# Creator Passports
 
-A small developer directory app for creator identities and GitHub-linked passports.
+A GitHub-authenticated creator passport directory for developers.
 
 ## Features
-- Unique creator IDs
-- Developer directory search
-- Create new creator passports
-- Verified/unverified badge state
-- Persistent backend storage with Express
-- Local storage fallback for browser-only use
+- Searchable developer directory
+- Verified creator badges
+- GitHub OAuth sign-in
+- SQLite-backed persistence
+- Public creator profile updates
+- Reset to demo creators
 
-## Run locally
+## Requirements
+- Node.js 18+
+- A GitHub OAuth app
+
+## Setup
 
 1. Install dependencies:
    ```bash
    npm install
    ```
 
-2. Start the app:
+2. Create a GitHub OAuth app at https://github.com/settings/developers
+
+3. Set environment variables:
+   ```bash
+   export GITHUB_CLIENT_ID="your-client-id"
+   export GITHUB_CLIENT_SECRET="your-client-secret"
+   export APP_URL="http://localhost:3000"
+   export SESSION_SECRET="your-session-secret"
+   ```
+
+4. Start the app:
    ```bash
    npm start
    ```
 
-3. Open:
+5. Open:
    ```bash
    http://localhost:3000
    ```
 
-## Files
-- `index.html` — UI shell
-- `styles.css` — styling
-- `app.js` — UI logic and fetch integration
-- `server.js` — Express backend and API
-- `data/creators.json` — saved creator data
-
-## API
-- `GET /api/creators` — list creators
-- `POST /api/creators` — add a new creator
-- `POST /api/reset` — restore demo data
+## API endpoints
+- `GET /api/creators` — list all creator passports
+- `GET /api/session` — current signed-in GitHub user
+- `POST /api/profile` — update the signed-in creator profile
+- `POST /api/reset` — restore demo creators
+- `POST /api/logout` — sign the user out
 
 ## Notes
-This is a solid MVP foundation and is ready to extend with GitHub OAuth, real authentication, and a database-backed profile system.
+This is a strong MVP foundation for creator verification and GitHub-linked developer identities. It is ready for future improvements like organization membership checks, admin approval flows, and richer profile pages.
