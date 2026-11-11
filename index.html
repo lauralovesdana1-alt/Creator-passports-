@@ -1,57 +1,96 @@
-# Creator Passports
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GitHub Creator Passports</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Developer directory</p>
+          <h1>GitHub Creator Passports</h1>
+        </div>
 
-A GitHub-authenticated creator passport directory for developers.
+        <div class="header-actions">
+          <span class="status-pill" id="authStatus">Not signed in</span>
+          <button class="primary-btn" type="button" id="githubLoginBtn">Sign in with GitHub</button>
+          <button class="secondary-btn hidden" type="button" id="logoutBtn">Sign out</button>
+          <button class="secondary-btn" type="button" id="resetDemo">Reset demo</button>
+          <button class="primary-btn" type="button" id="scrollToForm">Create passport</button>
+        </div>
+      </header>
 
-## Features
-- Searchable developer directory
-- Verified creator badges
-- GitHub OAuth sign-in
-- SQLite-backed persistence
-- Public profile pages
-- Profile editing for signed-in users
-- Reset to demo creators
+      <main class="layout">
+        <section class="panel search-panel">
+          <div class="panel-heading">
+            <span class="chip success">Live directory</span>
+            <h2>Find creators</h2>
+          </div>
 
-## Requirements
-- Node.js 18+
-- A GitHub OAuth app
+          <label class="field">
+            <span>Search by name, GitHub handle, or skill</span>
+            <input id="searchInput" type="text" placeholder="Try: react, octocat, dana..." />
+          </label>
+        </section>
 
-## Setup
+        <section class="panel form-panel" id="passportFormSection">
+          <div class="panel-heading">
+            <span class="chip">New</span>
+            <h2>Create creator passport</h2>
+          </div>
 
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
+          <form id="creatorForm" novalidate>
+            <div class="input-grid">
+              <label class="field">
+                <span>Full name</span>
+                <input id="nameInput" name="name" type="text" placeholder="Dana Lee" required />
+              </label>
 
-2. Create a GitHub OAuth app at https://github.com/settings/developers
+              <label class="field">
+                <span>GitHub username</span>
+                <input id="githubInput" name="githubUsername" type="text" placeholder="octocat" required />
+              </label>
+            </div>
 
-3. Set environment variables:
-   ```bash
-   export GITHUB_CLIENT_ID="your-client-id"
-   export GITHUB_CLIENT_SECRET="your-client-secret"
-   export APP_URL="http://localhost:3000"
-   export SESSION_SECRET="your-session-secret"
-   ```
+            <label class="field">
+              <span>Bio</span>
+              <textarea id="bioInput" name="bio" rows="3" placeholder="Frontend engineer building developer tools for the GitHub ecosystem..."></textarea>
+            </label>
 
-4. Start the app:
-   ```bash
-   npm start
-   ```
+            <label class="field">
+              <span>Skills</span>
+              <input id="skillsInput" name="skills" type="text" placeholder="react, node, ui design" required />
+            </label>
 
-5. Open:
-   ```bash
-   http://localhost:3000
-   ```
+            <div class="check-row">
+              <label class="checkbox-wrap">
+                <input id="verifiedInput" name="verified" type="checkbox" checked />
+                <span>Verified developer</span>
+              </label>
+            </div>
 
-## Profile route
-- Visit `/profile/:githubUsername` to view a public creator profile page.
+            <div class="form-actions">
+              <button class="primary-btn" type="submit">Generate passport</button>
+            </div>
+          </form>
+        </section>
+      </main>
 
-## API endpoints
-- `GET /api/creators` — list all creator passports
-- `GET /api/creator/:username` — fetch a single creator record
-- `GET /api/session` — current signed-in GitHub user
-- `POST /api/profile` — update the signed-in creator profile
-- `POST /api/reset` — restore demo creators
-- `POST /api/logout` — sign the user out
+      <section class="results">
+        <div class="results-header">
+          <h2>Developer passports</h2>
+          <span id="resultCount">0 creators</span>
+        </div>
+        <div id="creatorGrid" class="creator-grid" aria-live="polite"></div>
+      </section>
+    </div>
 
-## Notes
-This is a solid MVP foundation for creator verification and GitHub-linked developer identities. It is ready for future improvements like organization membership checks, admin approval flows, and richer profile pages.
+    <script src="app.js"></script>
+  </body>
+</html>
