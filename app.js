@@ -1,392 +1,355 @@
-:root {
-  --bg: #0b1020;
-  --bg-soft: #121a2d;
-  --panel: rgba(17, 25, 40, 0.9);
-  --panel-border: rgba(148, 163, 184, 0.16);
-  --text: #e5eefb;
-  --muted: #9fb0d1;
-  --primary: #7c9cff;
-  --primary-strong: #5d7df5;
-  --success: #3edc91;
-  --warning: #fbbf24;
-  --shadow: 0 18px 40px rgba(15, 23, 42, 0.35);
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  font-family: "Inter", sans-serif;
-  background:
-    radial-gradient(circle at top, rgba(124, 156, 255, 0.18), transparent 30%),
-    linear-gradient(180deg, #070d18 0%, #0a1221 100%);
-  color: var(--text);
-}
-
-img {
-  max-width: 100%;
-  display: block;
-}
-
-button,
-input,
-textarea {
-  font: inherit;
-}
-
-.page-shell {
-  width: min(1180px, calc(100% - 32px));
-  margin: 0 auto;
-  padding: 32px 0 56px;
-}
-
-.topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  margin-bottom: 24px;
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.eyebrow {
-  margin: 0 0 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-size: 0.72rem;
-  color: var(--muted);
-}
-
-h1,
-h2,
-h3,
-p {
-  margin-top: 0;
-}
-
-h1 {
-  margin-bottom: 0;
-  font-size: clamp(2rem, 3vw, 3rem);
-}
-
-.layout {
-  display: grid;
-  grid-template-columns: 1fr 1.2fr;
-  gap: 24px;
-  margin-bottom: 28px;
-}
-
-.panel {
-  background: var(--panel);
-  border: 1px solid var(--panel-border);
-  border-radius: 22px;
-  box-shadow: var(--shadow);
-  padding: 22px;
-}
-
-.panel-heading {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 18px;
-}
-
-.panel-heading h2,
-.results-header h2 {
-  margin: 0;
-  font-size: 1.4rem;
-}
-
-.chip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 5px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(124, 156, 255, 0.35);
-  background: rgba(124, 156, 255, 0.08);
-  color: #cfe1ff;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.chip.success {
-  border-color: rgba(62, 220, 145, 0.35);
-  background: rgba(62, 220, 145, 0.08);
-  color: #d3ffe9;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  color: var(--muted);
-  font-size: 0.92rem;
-}
-
-.field input,
-.field textarea {
-  width: 100%;
-  resize: vertical;
-  padding: 0.9rem 1rem;
-  border-radius: 14px;
-  border: 1px solid rgba(148, 163, 184, 0.22);
-  background: rgba(15, 23, 42, 0.8);
-  color: var(--text);
-  outline: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.field input:focus,
-.field textarea:focus {
-  border-color: rgba(124, 156, 255, 0.8);
-  box-shadow: 0 0 0 4px rgba(124, 156, 255, 0.12);
-}
-
-.input-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.check-row {
-  margin: 18px 0 22px;
-}
-
-.checkbox-wrap {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--text);
-}
-
-.checkbox-wrap input {
-  width: 18px;
-  height: 18px;
-  accent-color: var(--primary);
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-start;
-}
-
-.primary-btn,
-.secondary-btn {
-  border: none;
-  border-radius: 12px;
-  padding: 0.9rem 1.1rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
-}
-
-.primary-btn {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-strong) 100%);
-  color: white;
-  box-shadow: 0 10px 22px rgba(93, 125, 245, 0.35);
-}
-
-.secondary-btn {
-  background: rgba(148, 163, 184, 0.08);
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  color: var(--text);
-}
-
-.primary-btn:hover,
-.secondary-btn:hover {
-  transform: translateY(-1px);
-}
-
-.results {
-  background: rgba(8, 14, 24, 0.82);
-  border: 1px solid var(--panel-border);
-  border-radius: 22px;
-  padding: 24px;
-}
-
-.results-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 18px;
-}
-
-.results-header span {
-  color: var(--muted);
-  font-size: 0.9rem;
-}
-
-.creator-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 18px;
-}
-
-.creator-card {
-  background: rgba(17, 25, 40, 0.9);
-  border: 1px solid var(--panel-border);
-  border-radius: 18px;
-  padding: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.card-top {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
-.card-top img {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid rgba(124, 156, 255, 0.5);
-}
-
-.identity-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.identity-row h3 {
-  margin: 0;
-  font-size: 1.05rem;
-}
-
-.username {
-  margin: 4px 0 0;
-  color: var(--muted);
-  font-size: 0.87rem;
-}
-
-.verified-badge,
-.unverified-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  padding: 4px 8px;
-  font-size: 0.68rem;
-  font-weight: 700;
-}
-
-.verified-badge {
-  background: rgba(62, 220, 145, 0.12);
-  border: 1px solid rgba(62, 220, 145, 0.4);
-  color: #bfffe0;
-}
-
-.unverified-badge {
-  background: rgba(251, 191, 36, 0.08);
-  border: 1px solid rgba(251, 191, 36, 0.28);
-  color: #ffe6a3;
-}
-
-.creator-id-box {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: rgba(124, 156, 255, 0.08);
-  border: 1px solid rgba(124, 156, 255, 0.18);
-  color: var(--muted);
-}
-
-.creator-id-box strong {
-  color: var(--text);
-  font-size: 0.8rem;
-  word-break: break-all;
-  text-align: right;
-}
-
-.bio {
-  margin: 0;
-  color: #d7e0f6;
-  line-height: 1.6;
-  min-height: 72px;
-}
-
-.tags {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.tag {
-  display: inline-flex;
-  padding: 6px 9px;
-  border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.25);
-  background: rgba(15, 23, 42, 0.7);
-  color: #dfeafe;
-  font-size: 0.72rem;
-}
-
-.empty-state {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 32px 16px;
-  color: var(--muted);
-  border: 1px dashed rgba(148, 163, 184, 0.25);
-  border-radius: 16px;
-  background: rgba(15, 23, 42, 0.38);
-}
-
-.empty-state h3 {
-  margin-bottom: 8px;
-  color: var(--text);
-}
-
-@media (max-width: 780px) {
-  .layout {
-    grid-template-columns: 1fr;
+const STORAGE_KEY = 'creator-passports-v2';
+const DEFAULT_CREATORS = [
+  {
+    id: 'creator-dana-20391',
+    name: 'Dana Reed',
+    githubUsername: 'lauralovesdana1-alt',
+    bio: 'Builds developer tools, growth systems, and elegant product experiences.',
+    skills: ['React', 'Node', 'UX', 'GitHub API'],
+    verified: true,
+    avatarUrl: 'https://github.com/lauralovesdana1-alt.png?size=160'
+  },
+  {
+    id: 'creator-oliver-40198',
+    name: 'Oliver Grant',
+    githubUsername: 'olivergrant',
+    bio: 'Platform engineer focused on open-source tooling and scalable internal APIs.',
+    skills: ['Go', 'DevOps', 'Kubernetes', 'CI/CD'],
+    verified: true,
+    avatarUrl: 'https://github.com/olivergrant.png?size=160'
+  },
+  {
+    id: 'creator-sanya-78501',
+    name: 'Sanya Patel',
+    githubUsername: 'sanyapatel',
+    bio: 'Designs developer experiences and product architecture for creator communities.',
+    skills: ['TypeScript', 'Design Systems', 'Frontend', 'AI'],
+    verified: false,
+    avatarUrl: 'https://github.com/sanyapatel.png?size=160'
+  },
+  {
+    id: 'creator-jamie-90317',
+    name: 'Jamie Collins',
+    githubUsername: 'jamiecollins',
+    bio: 'Shipping developer experiences that combine performance, trust, and clarity.',
+    skills: ['Rust', 'Systems', 'Performance', 'Security'],
+    verified: true,
+    avatarUrl: 'https://github.com/jamiecollins.png?size=160'
   }
+];
 
-  .topbar,
-  .results-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+const creatorGrid = document.querySelector('#creatorGrid');
+const searchInput = document.querySelector('#searchInput');
+const creatorForm = document.querySelector('#creatorForm');
+const resultCount = document.querySelector('#resultCount');
+const scrollToFormButton = document.querySelector('#scrollToForm');
+const resetDemoButton = document.querySelector('#resetDemo');
+const githubLoginButton = document.querySelector('#githubLoginBtn');
+const logoutButton = document.querySelector('#logoutBtn');
+const authStatus = document.querySelector('#authStatus');
+const nameInput = document.querySelector('#nameInput');
+const githubInput = document.querySelector('#githubInput');
+const bioInput = document.querySelector('#bioInput');
+const skillsInput = document.querySelector('#skillsInput');
+const verifiedInput = document.querySelector('#verifiedInput');
 
-  .input-grid {
-    grid-template-columns: 1fr;
-  }
+let creators = [...DEFAULT_CREATORS];
+let currentUser = null;
 
-  .header-actions {
-    width: 100%;
-    justify-content: flex-start;
+function persistLocalCreators(list) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  } catch (error) {
+    console.warn('Unable to save creators locally:', error);
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
-  .primary-btn,
-  .secondary-btn {
-    transition: none;
+function loadLocalCreators() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return [...DEFAULT_CREATORS];
+    const parsed = JSON.parse(saved);
+    return Array.isArray(parsed) && parsed.length ? parsed : [...DEFAULT_CREATORS];
+  } catch (error) {
+    console.warn('Unable to load local creators:', error);
+    return [...DEFAULT_CREATORS];
   }
 }
+
+function safeAvatar(creator) {
+  if (creator.avatarUrl) return creator.avatarUrl;
+  if (creator.githubUsername) return `https://github.com/${creator.githubUsername}.png?size=160`;
+  return 'https://ui-avatars.com/api/?name=Developer&background=7c9cff&color=fff';
+}
+
+function normalizeSkills(value) {
+  return value
+    .split(',')
+    .map((skill) => skill.trim())
+    .filter(Boolean);
+}
+
+function getVisibleCreators() {
+  const query = (searchInput?.value || '').trim().toLowerCase();
+  if (!query) return creators;
+
+  return creators.filter((creator) => {
+    const haystack = [
+      creator.name,
+      creator.githubUsername,
+      creator.bio,
+      (creator.skills || []).join(' '),
+      creator.id
+    ].join(' ').toLowerCase();
+
+    return haystack.includes(query);
+  });
+}
+
+function renderCreators(list) {
+  if (!creatorGrid) return;
+
+  resultCount.textContent = `${list.length} creator${list.length === 1 ? '' : 's'}`;
+
+  if (!list.length) {
+    creatorGrid.innerHTML = `
+      <div class="empty-state">
+        <h3>No creators found</h3>
+        <p>Try a different name, GitHub handle, or skill.</p>
+      </div>
+    `;
+    return;
+  }
+
+  creatorGrid.innerHTML = list
+    .map((creator) => `
+      <article class="creator-card">
+        <div class="card-top">
+          <img
+            src="${safeAvatar(creator)}"
+            alt="${creator.name}"
+            onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(creator.name || 'Developer')}&background=7c9cff&color=fff';"
+          />
+          <div>
+            <div class="identity-row">
+              <h3>${creator.name}</h3>
+              ${creator.verified ? '<span class="verified-badge">Verified</span>' : '<span class="unverified-badge">Unverified</span>'}
+            </div>
+            <p class="username">@${creator.githubUsername || 'unknown'}</p>
+          </div>
+        </div>
+
+        <div class="creator-id-box">
+          <span>Creator ID</span>
+          <strong>${creator.id}</strong>
+        </div>
+
+        <p class="bio">${creator.bio || 'Developer building meaningful experiences for the open web.'}</p>
+
+        <div class="tags">
+          ${(creator.skills || []).map((skill) => `<span class="tag">${skill}</span>`).join('')}
+        </div>
+
+        <a class="profile-link" href="/profile/${encodeURIComponent(creator.githubUsername || creator.name)}" target="_blank" rel="noreferrer">View profile</a>
+      </article>
+    `)
+    .join('');
+}
+
+function updateView() {
+  renderCreators(getVisibleCreators());
+}
+
+async function loadCreators() {
+  try {
+    const response = await fetch('/api/creators', { cache: 'no-store' });
+    if (!response.ok) throw new Error('Could not load creators');
+    const data = await response.json();
+    creators = Array.isArray(data) && data.length ? data : loadLocalCreators();
+    persistLocalCreators(creators);
+  } catch (error) {
+    console.warn('Using local fallback data:', error);
+    creators = loadLocalCreators();
+  }
+
+  updateView();
+}
+
+async function fetchSession() {
+  try {
+    const response = await fetch('/api/session');
+    if (!response.ok) throw new Error('Session request failed');
+    const data = await response.json();
+    currentUser = data.user || null;
+    updateAuthUI();
+    return currentUser;
+  } catch (error) {
+    console.warn('No active session:', error);
+    currentUser = null;
+    updateAuthUI();
+    return null;
+  }
+}
+
+function updateAuthUI() {
+  const signedIn = Boolean(currentUser);
+
+  if (authStatus) {
+    authStatus.textContent = signedIn ? `Signed in as ${currentUser.github_username}` : 'Not signed in';
+  }
+
+  if (githubLoginButton) {
+    githubLoginButton.classList.toggle('hidden', signedIn);
+  }
+
+  if (logoutButton) {
+    logoutButton.classList.toggle('hidden', !signedIn);
+  }
+
+  if (signedIn && nameInput && githubInput && bioInput && skillsInput && verifiedInput) {
+    nameInput.value = currentUser.display_name || currentUser.github_username || '';
+    githubInput.value = currentUser.github_username || '';
+    bioInput.value = currentUser.bio || '';
+    verifiedInput.checked = true;
+  }
+}
+
+async function submitProfile(event) {
+  event.preventDefault();
+
+  if (!currentUser) {
+    window.location.href = '/auth/github';
+    return;
+  }
+
+  const payload = {
+    name: nameInput.value.trim(),
+    bio: bioInput.value.trim(),
+    website: '',
+    skills: normalizeSkills(skillsInput.value),
+    verified: verifiedInput.checked
+  };
+
+  if (!payload.name || !payload.skills.length) {
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      throw new Error('Profile update failed');
+    }
+
+    await loadCreators();
+    creatorForm.reset();
+    if (searchInput) searchInput.value = '';
+  } catch (error) {
+    console.error('Profile save failed:', error);
+  }
+}
+
+async function resetDemoData() {
+  try {
+    const response = await fetch('/api/reset', { method: 'POST' });
+    if (!response.ok) throw new Error('Reset failed');
+    creators = await response.json();
+    persistLocalCreators(creators);
+    if (searchInput) searchInput.value = '';
+    updateView();
+  } catch (error) {
+    console.warn('Using demo fallback reset:', error);
+    creators = [...DEFAULT_CREATORS];
+    persistLocalCreators(creators);
+    updateView();
+  }
+}
+
+async function signOut() {
+  try {
+    await fetch('/api/logout', { method: 'POST' });
+  } catch (error) {
+    console.warn('Logout request failed:', error);
+  }
+
+  currentUser = null;
+  updateAuthUI();
+  if (creatorForm) creatorForm.reset();
+}
+
+if (searchInput) {
+  searchInput.addEventListener('input', updateView);
+}
+
+if (creatorForm) {
+  creatorForm.addEventListener('submit', submitProfile);
+}
+
+if (resetDemoButton) {
+  resetDemoButton.addEventListener('click', resetDemoData);
+}
+
+if (githubLoginButton) {
+  githubLoginButton.addEventListener('click', () => {
+    window.location.href = '/auth/github';
+  });
+}
+
+if (logoutButton) {
+  logoutButton.addEventListener('click', signOut);
+}
+
+if (scrollToFormButton) {
+  scrollToFormButton.addEventListener('click', () => {
+    const formSection = document.querySelector('#passportFormSection');
+    if (formSection) {
+      formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+}
+
+fetchSession();
+loadCreators();
+
+window.addEventListener('error', (event) => {
+  console.error('Runtime error:', event.error || event.message);
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Unhandled rejection:', event.reason);
+});
+
+if (!creatorGrid || !searchInput || !creatorForm || !resultCount) {
+  console.error('Required app UI elements are missing.');
+}
+
+// CSS for header buttons, status pill, and profile link
+const css = `
+  .hidden { display: none !important; }
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(124,156,255,0.10);
+    border: 1px solid rgba(124,156,255,0.22);
+    color: #dfeafe;
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+  .profile-link {
+    color: #bfd2ff;
+    text-decoration: none;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+  .profile-link:hover { text-decoration: underline; }
+`;
+
+const styleTag = document.createElement('style');
+styleTag.textContent = css;
+document.head.appendChild(styleTag);
